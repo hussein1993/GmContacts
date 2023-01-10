@@ -31,6 +31,9 @@ class MainActivity : ComponentActivity() {
 
         _viewModel=  ViewModelProvider(this).get(ContactsViewModel::class.java)
 
+        if(_viewModel.permissionGranted.value == false) {
+            requestReadContactsPermission(this)
+        }
         setContent {
 
             GmContactsTheme {
@@ -45,9 +48,9 @@ class MainActivity : ComponentActivity() {
 //                    _viewModel.permissionGranted.observe(this, Observer {
 //
 //                    })
-                    _viewModel.contacts.observe(this,{
-
-                    })
+//                    _viewModel.contacts.observe(this,{
+//
+//                    })
                    SetupNavGraph(navController = navController, _viewModel = _viewModel)
                    // MainScreen(contactsViewModel = _viewModel)
 
@@ -55,9 +58,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if(_viewModel.permissionGranted.value == false) {
-            requestReadContactsPermission(this)
-        }
+
     }
 
 
@@ -68,6 +69,7 @@ class MainActivity : ComponentActivity() {
             // Request read contacts permission
         ActivityCompat.requestPermissions(mainActivity, arrayOf(Manifest.permission.READ_CONTACTS),PERMISSION_ALL)
         } else {
+            _viewModel.updateIsDataAvailable(false)
             _viewModel.setPermissionGranted(true)
             Log.i("huss","XXXXXXXXXXXXXXXXXXXx")
         }
@@ -84,6 +86,8 @@ class MainActivity : ComponentActivity() {
             } else {
                 // Permission was denied, set the flag in the viewModel
                 _viewModel.setPermissionGranted(false)
+                _viewModel.updateIsDataAvailable(true)
+                Log.i("huss","FAAAAAAAAAALSEEEEEE")
             }
         }
     }

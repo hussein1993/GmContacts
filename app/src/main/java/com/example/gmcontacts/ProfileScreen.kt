@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -74,10 +76,12 @@ fun ProfileContent(contact: Contact) {
             Text(
                 text = contact.name,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp),
                 fontSize = MaterialTheme.typography.h4.fontSize,
             fontStyle = FontStyle.Italic)
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             InfoLayouts(contact.phoneNumbers)
             InfoLayouts(contact.emails)
 
@@ -88,11 +92,12 @@ fun ProfileContent(contact: Contact) {
 @Composable
 fun InfoLayouts(infoListPairs: List<Pair<String, String>>) {
 
-       Column(Modifier.fillMaxWidth()){
+       Column(
+           Modifier
+               .fillMaxWidth()
+               .padding(5.dp)){
            infoListPairs.forEach { item ->
-               Surface(elevation = 10.dp) {
                    InfoRow(item)
-               }
 
                Spacer(modifier = Modifier
                    .height(10.dp)
@@ -104,26 +109,30 @@ fun InfoLayouts(infoListPairs: List<Pair<String, String>>) {
 
 @Composable
 fun InfoRow(infoPair: Pair<String,String>){
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .padding(all = 10.dp),
-    horizontalArrangement = Arrangement.SpaceBetween,) {
-        Text(
-            text = infoPair.first,
-            color = MaterialTheme.colors.secondaryVariant,
-            modifier = Modifier.align(Alignment.CenterVertically),
-            fontSize = 24.sp
-        )
-        Text(
-            text = infoPair.second,
+    Card(elevation = 10.dp,
+    shape = RoundedCornerShape(10.dp)) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,) {
+            Text(
+                text = infoPair.first,
+                color = MaterialTheme.colors.secondaryVariant,
+                modifier = Modifier.align(Alignment.CenterVertically),
+                fontSize = 24.sp
+            )
+            Text(
+                text = infoPair.second,
 
-            color = MaterialTheme.colors.secondaryVariant,
-            modifier = Modifier.align(Alignment.CenterVertically),
-            fontSize = 24.sp
-        )
+                color = MaterialTheme.colors.secondaryVariant,
+                modifier = Modifier.align(Alignment.CenterVertically),
+                fontSize = 24.sp
+            )
 
 
+        }
     }
+
 }
 
 

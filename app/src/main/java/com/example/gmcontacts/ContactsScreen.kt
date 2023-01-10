@@ -2,6 +2,7 @@ package com.example.gmcontacts
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -198,14 +199,28 @@ fun SearchAppBar(
 fun ContactsScreen(contactsViewModel: ContactsViewModel = viewModel(), navController: NavController){
 
     val res : List<Contact> by contactsViewModel.contacts.observeAsState(ArrayList<Contact>())
+    val isDataAvaialable =  contactsViewModel.isDataReady.observeAsState(false)
     if(res.isEmpty()){
+
+        if(isDataAvaialable.value) {
             Text(
                 text = "No Contacts Found!",
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxSize().padding(10.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp),
 
                 fontSize = 20.sp
             )
+        }else{
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth().padding(15.dp)
+            ) {
+                CircularProgressIndicator()
+            }
+
+        }
     }else {
         ContactsContent(contacts = res,navController,contactsViewModel)
     }
@@ -219,15 +234,18 @@ fun ContactsContent(
     contactsViewModel: ContactsViewModel
 ) {
     Box {
-        LazyColumn(Modifier.fillMaxWidth()) {
-            items(contacts) { contact ->
-                ContactCard(contact = contact,navController,contactsViewModel)
-                Spacer(modifier = Modifier
-                    .height(10.dp)
-                    .background(color = MaterialTheme.colors.secondaryVariant))
+            LazyColumn(Modifier.fillMaxWidth()) {
+                items(contacts) { contact ->
+                    ContactCard(contact = contact, navController, contactsViewModel)
+                    Spacer(
+                        modifier = Modifier
+                            .height(10.dp)
+                            .background(color = MaterialTheme.colors.secondaryVariant)
+                    )
+                }
             }
-        }
-      //  CircularProgressIndicator(modifier = Modifier)
+
+
 
     }
 }

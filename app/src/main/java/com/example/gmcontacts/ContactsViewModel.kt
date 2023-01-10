@@ -33,6 +33,10 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
 
     val searchWidgetState: State<SearchWidgetState> = _searchWidgetState
 
+    private val _isDataReady: MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
+
+    val isDataReady: LiveData<Boolean> = _isDataReady
+
 
     private val _searchTextState: MutableState<String> =
         mutableStateOf(value = "")
@@ -57,6 +61,9 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
     fun updateSearchWidgetState(newValue: SearchWidgetState) {
         _searchWidgetState.value = newValue
     }
+    fun updateIsDataAvailable(newValue: Boolean) {
+        _isDataReady.value = newValue
+    }
 
 
     fun updateSearchTextState(newValue: String) {
@@ -73,6 +80,7 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
             viewModelScope.launch {
                 val contactList = repository.importContacts(filterName = searchTextState.value)
                 _contacts.value = contactList
+                updateIsDataAvailable(true)
                 Log.i("huss", "loadContacts-${contactList.size}")
             }
         }
