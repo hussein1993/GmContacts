@@ -34,8 +34,8 @@ class ContactsRepository ( val _context: Context){
 
 
 
-        val emailAddresses = getEmailsTypes(cursor, id = contact.id)
-        val phoneNumbers = getNumbersTypes(cursor,contact.id)
+        val emailAddresses = getEmailsTypes(id = contact.id)
+        val phoneNumbers = getNumbersTypes(contact.id)
 
 
         contact.phoneNumbers = phoneNumbers
@@ -65,10 +65,8 @@ class ContactsRepository ( val _context: Context){
                 val _id =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID)
                 val _name = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
                 val _photo = cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)
-                val _phone_num = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                val _phone_type = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE)
-                val _emailAddress = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-                val _emailType = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE)
+
+
                 while (cursor.moveToNext()) {
 
                     val id = cursor.getString(_id)
@@ -100,7 +98,7 @@ class ContactsRepository ( val _context: Context){
     }
 
     @SuppressLint("Range")
-    private fun getNumbersTypes(cursor: Cursor?, id: String): List<Pair<String, String>> {
+    private fun getNumbersTypes(id: String): List<Pair<String, String>> {
 // Get the phone numbers for the contact
         val contentResolver: ContentResolver? = _context.getContentResolver()
         val projection = arrayOf(
@@ -143,15 +141,9 @@ class ContactsRepository ( val _context: Context){
 
 
     @SuppressLint("Range")
-    private fun getEmailsTypes(cursor: Cursor?, id: String): List<Pair<String, String>> {
+    private fun getEmailsTypes(id: String): List<Pair<String, String>> {
 // Get the phone numbers for the contact
         val contentResolver: ContentResolver? = _context.getContentResolver()
-        val projection = arrayOf(
-            ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.CommonDataKinds.Email.ADDRESS,
-            ContactsContract.Contacts.PHOTO_URI
-        )
 
         val emailAddresses = mutableListOf<Pair<String, String>>()
         val emailCursor = contentResolver?.query(
