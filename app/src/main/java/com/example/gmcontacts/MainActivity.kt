@@ -6,85 +6,88 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelLazy
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.gmcontacts.ui.theme.GmContactsTheme
 
+
 class MainActivity : ComponentActivity() {
-    lateinit var _repo : ContactsRepository
 
 
-
+    val PERMISSION_ALL = 1
+    lateinit var _viewModel :ContactsViewModel
+    lateinit var navController : NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestReadContactsPermission(this)
         Log.i("huss","ONCreate")
 
-
+        _viewModel=  ViewModelProvider(this).get(ContactsViewModel::class.java)
 
         setContent {
-            val _viewModel : ContactsViewModel by viewModels()
+
             GmContactsTheme {
+                navController = rememberNavController()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
+
                     Log.i("huss","SUrface")
-                    _viewModel.loadContacts()
-                    MainScreen(contactsViewModel = _viewModel)
+//                    _viewModel.permissionGranted.observe(this, Observer {
+//
+//                    })
+                    _viewModel.contacts.observe(this,{
+
+                    })
+                   SetupNavGraph(navController = navController, _viewModel = _viewModel)
+                   // MainScreen(contactsViewModel = _viewModel)
 
                 }
             }
+        }
+
+        if(_viewModel.permissionGranted.value == false) {
+            requestReadContactsPermission(this)
         }
     }
 
 
     fun requestReadContactsPermission(mainActivity: MainActivity) {
-        val PERMISSION_ALL = 1
         // Check if the app has read contacts permission
         if (ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.READ_CONTACTS)
             != PackageManager.PERMISSION_GRANTED) {
             // Request read contacts permission
-            ActivityCompat.requestPermissions(mainActivity, arrayOf(Manifest.permission.READ_CONTACTS),PERMISSION_ALL)
+        ActivityCompat.requestPermissions(mainActivity, arrayOf(Manifest.permission.READ_CONTACTS),PERMISSION_ALL)
         } else {
-            _repo = ContactsRepository(applicationContext)
-            // If the app already has read contacts permission, you can do what you need to do
-            // with the contacts here
+            _viewModel.setPermissionGranted(true)
+            Log.i("huss","XXXXXXXXXXXXXXXXXXXx")
         }
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_ALL) {
+            // If request is cancelled, the result arrays are empty.
+            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                // Permission was granted, set the flag in the viewModel
+                _viewModel.setPermissionGranted(true)
+                Log.i("huss","result Permission arrive Goood")
+            } else {
+                // Permission was denied, set the flag in the viewModel
+                _viewModel.setPermissionGranted(false)
+            }
+        }
+    }
+
 }
 
 

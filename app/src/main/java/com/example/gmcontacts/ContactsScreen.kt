@@ -1,9 +1,12 @@
 package com.example.gmcontacts
 
-import android.util.Log
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,12 +30,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreen(contactsViewModel: ContactsViewModel){
+fun MainScreen(contactsViewModel: ContactsViewModel = viewModel(),navController: NavController){
 
     val searchWidgetState by remember {
         contactsViewModel.searchWidgetState
@@ -40,6 +46,7 @@ fun MainScreen(contactsViewModel: ContactsViewModel){
     val searchTextState by remember {
         contactsViewModel.searchTextState
     }
+    
 
     Scaffold(
         topBar = {
@@ -61,7 +68,7 @@ fun MainScreen(contactsViewModel: ContactsViewModel){
             ) }
 
     ) {
-        ContactsScreen(contactsViewModel = contactsViewModel)
+        ContactsScreen(contactsViewModel = contactsViewModel,navController)
     }
 }
 
@@ -96,9 +103,11 @@ fun MainAppBar(
 @Composable
 fun DefaultAppBar(onSearchClicked: () -> Unit) {
     TopAppBar(
+
         title = {
             Text(
-                text = "Home"
+                text = "Home",
+                color = Color.White
             )
         },
         actions = {
@@ -111,7 +120,8 @@ fun DefaultAppBar(onSearchClicked: () -> Unit) {
                     tint = Color.White
                 )
             }
-        }
+        },
+        backgroundColor = MaterialTheme.colors.secondaryVariant
     )
 }
 
@@ -127,15 +137,15 @@ fun SearchAppBar(
         .fillMaxWidth()
         .height(56.dp),
         elevation = AppBarDefaults.TopAppBarElevation,
-        color = MaterialTheme.colors.primary) {
-        TextField(value = text, onValueChange = {
+        color = MaterialTheme.colors.secondaryVariant) {
+        TextField( value = text, onValueChange = {
             onTextChange(it)
         },
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
                     modifier = Modifier.alpha(ContentAlpha.medium),
-                    text = "Search ...",
+                    text = "Search here...",
                     color = Color.White
                 )
             },
@@ -145,7 +155,7 @@ fun SearchAppBar(
             singleLine = true,
             leadingIcon = {
                 IconButton(modifier = Modifier.alpha(ContentAlpha.medium),
-                    onClick = {})
+                    onClick = { })
                 {
                     Icon(imageVector = Icons.Default.Search,
                         contentDescription = "searchIcon",
@@ -185,44 +195,62 @@ fun SearchAppBar(
 
 
 @Composable
-fun ContactsScreen(contactsViewModel : ContactsViewModel = viewModel()){
+fun ContactsScreen(contactsViewModel: ContactsViewModel = viewModel(), navController: NavController){
 
     val res : List<Contact> by contactsViewModel.contacts.observeAsState(ArrayList<Contact>())
-    if(res == null || res.size == 0){
-        Text(text = "No Contacts Found!",
-            textAlign = TextAlign.Center
-        )
+    if(res.isEmpty()){
+            Text(
+                text = "No Contacts Found!",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxSize().padding(10.dp),
+
+                fontSize = 20.sp
+            )
     }else {
-        ContactsContent(contacts = res)
+        ContactsContent(contacts = res,navController,contactsViewModel)
     }
 }
 
+
 @Composable
-fun ContactsContent(contacts: List<Contact>) {
+fun ContactsContent(
+    contacts: List<Contact>,
+    navController: NavController,
+    contactsViewModel: ContactsViewModel
+) {
     Box {
         LazyColumn(Modifier.fillMaxWidth()) {
             items(contacts) { contact ->
-                ContactCard(contact = contact)
+                ContactCard(contact = contact,navController,contactsViewModel)
                 Spacer(modifier = Modifier
                     .height(10.dp)
                     .background(color = MaterialTheme.colors.secondaryVariant))
             }
         }
+      //  CircularProgressIndicator(modifier = Modifier)
 
     }
 }
 
 
 @Composable
-fun ContactCard(contact: Contact){
+fun ContactCard(
+    contact: Contact,
+    navController: NavController,
+    contactsViewModel: ContactsViewModel
+){
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(all = 8.dp)) {
+        .padding(all = 8.dp)
+        .clickable {
+            contactsViewModel.updateSelectedContact(contact = contact)
+            navController.navigate(route = Screen.Profile.route)
+        }) {
         if(contact.img == null){
-            CircleImageWithInitials(contact.name[0]+"", Color.Cyan)
+            CircleImageWithInitials(contact.name[0]+"", Color(0xff44B08C))
         }else {
             Image(
-                bitmap = contact.img.asImageBitmap(),
+                bitmap = contact.photo,
                 contentDescription = "pImg",
                 modifier = Modifier
                     .size(40.dp)
@@ -232,8 +260,8 @@ fun ContactCard(contact: Contact){
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "${contact.id}-${contact.name}-${contact.phoneNumbers}-- ${contact.emails}",
-            color = MaterialTheme.colors.secondaryVariant,
+            text = contact.name,
+            color = Color.Black,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
 
@@ -246,6 +274,7 @@ fun CircleImageWithInitials(initials: String, color: Color) {
     Box(modifier = Modifier
         .size(40.dp)
         .clip(CircleShape)
+        .background(color = color)
         .border(1.5.dp, MaterialTheme.colors.secondary, CircleShape) ){
         Text(text = initials,
             textAlign = TextAlign.Center,
