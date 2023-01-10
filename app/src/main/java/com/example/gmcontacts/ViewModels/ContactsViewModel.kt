@@ -1,8 +1,6 @@
-package com.example.gmcontacts
+package com.example.gmcontacts.ViewModels
 
 import android.app.Application
-import android.graphics.Color
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -10,8 +8,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.gmcontacts.model.Contact
+import com.example.gmcontacts.model.SearchWidgetState
+import com.example.gmcontacts.repository.ContactsRepository
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 class ContactsViewModel(application: Application) : AndroidViewModel(application){
@@ -69,25 +69,18 @@ class ContactsViewModel(application: Application) : AndroidViewModel(application
     fun updateSearchTextState(newValue: String) {
         _searchTextState.value = newValue
         loadContacts(permissionGranted.value)
-        Log.i("huss", "loadContacts-SEAARCHHHH")
     }
 
 
     // Method that retrieves the contacts data from the repository and updates the LiveData object
     fun loadContacts(granted: Boolean?) {
-        Log.i("huss", "loadContacts-${granted}")
         if (granted == true) {
             viewModelScope.launch {
                 val contactList = repository.importContacts(filterName = searchTextState.value)
                 _contacts.value = contactList
                 updateIsDataAvailable(true)
-                Log.i("huss", "loadContacts-${contactList.size}")
             }
         }
     }
 
-
-    fun onRepoSuccess(data: List<Contact>) {
-        _contacts.value = data
-    }
 }

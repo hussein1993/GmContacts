@@ -1,32 +1,42 @@
-package com.example.gmcontacts
+package com.example.gmcontacts.repository
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
-import android.graphics.Bitmap
+import android.database.Cursor
 import android.graphics.BitmapFactory
 import android.net.Uri
-
 import android.provider.ContactsContract
-import android.util.Log
 import androidx.compose.ui.graphics.asImageBitmap
+import com.example.gmcontacts.model.Contact
 
 class ContactsRepository ( val _context: Context){
 
 
+
     @SuppressLint("Range")
-    fun getContactData(contact: Contact):Contact{
+    fun getContactData(contact: Contact): Contact {
+
+
         val contentResolver: ContentResolver? = _context.getContentResolver()
         val projection = arrayOf(
             ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Data.DISPLAY_NAME,
             ContactsContract.CommonDataKinds.Phone.NUMBER,
             ContactsContract.CommonDataKinds.Email.ADDRESS,
             ContactsContract.Contacts.PHOTO_URI
         )
-        val phoneNumbers = getNumbersTypes(contentResolver = contentResolver,contact.id)
-        val emailAddresses = getEmailsTypes(contentResolver = contentResolver, id = contact.id)
+        val cursor = contentResolver?.query(
+            ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection,
+            "${ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID} = ?",
+            arrayOf(contact.id)
+            ,null)
+
+
+
+        val emailAddresses = getEmailsTypes(cursor, id = contact.id)
+        val phoneNumbers = getNumbersTypes(cursor,contact.id)
+
 
         contact.phoneNumbers = phoneNumbers
         contact.emails = emailAddresses
@@ -60,17 +70,10 @@ class ContactsRepository ( val _context: Context){
                 val _emailAddress = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
                 val _emailType = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE)
                 while (cursor.moveToNext()) {
-                    var phoneNumbers : List<Pair<String, String>>
-                    var emailAddresses : List<Pair<String, String>>
 
-                    val id =
-                        cursor.getString(_id)
-                    val name =
-                        cursor.getString(_name)
-
-
+                    val id = cursor.getString(_id)
+                    val name = cursor.getString(_name)
                     val photoUri = cursor.getString(_photo)
-
 
                     val _cont = Contact(id= id ,name = name, phoneNumbers = listOf(), emails = listOf(), img = photoUri)
 
@@ -97,8 +100,16 @@ class ContactsRepository ( val _context: Context){
     }
 
     @SuppressLint("Range")
-    private fun getNumbersTypes(contentResolver: ContentResolver?, id: String): List<Pair<String, String>> {
+    private fun getNumbersTypes(cursor: Cursor?, id: String): List<Pair<String, String>> {
 // Get the phone numbers for the contact
+        val contentResolver: ContentResolver? = _context.getContentResolver()
+        val projection = arrayOf(
+            ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Phone.NUMBER,
+            ContactsContract.Contacts.PHOTO_URI
+        )
+
         val phoneNumbers = mutableListOf<Pair<String, String>>()
         val phoneCursor =
             contentResolver?.query(
@@ -109,10 +120,14 @@ class ContactsRepository ( val _context: Context){
             null
         )
 
+
         if (phoneCursor != null && phoneCursor.moveToFirst()) {
+            val _phone_num = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+            val _phone_type = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE)
+
             do {
-                val phoneNumber = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                val phoneType = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE))
+                val phoneNumber = phoneCursor.getString(_phone_num)
+                val phoneType = phoneCursor.getString(_phone_type)
                 var  phoneTypeLabel : String =""
                 if (!phoneType.isNullOrEmpty()){
                      phoneTypeLabel = ContactsContract.CommonDataKinds.Phone.getTypeLabel(_context.resources, phoneType.toInt(), null).toString()
@@ -128,8 +143,16 @@ class ContactsRepository ( val _context: Context){
 
 
     @SuppressLint("Range")
-    private fun getEmailsTypes(contentResolver: ContentResolver?, id: String): List<Pair<String, String>> {
+    private fun getEmailsTypes(cursor: Cursor?, id: String): List<Pair<String, String>> {
 // Get the phone numbers for the contact
+        val contentResolver: ContentResolver? = _context.getContentResolver()
+        val projection = arrayOf(
+            ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.CommonDataKinds.Email.ADDRESS,
+            ContactsContract.Contacts.PHOTO_URI
+        )
+
         val emailAddresses = mutableListOf<Pair<String, String>>()
         val emailCursor = contentResolver?.query(
             ContactsContract.CommonDataKinds.Email.CONTENT_URI,
@@ -140,10 +163,12 @@ class ContactsRepository ( val _context: Context){
         )
 
         if (emailCursor != null && emailCursor.moveToFirst()) {
+            val _emailAddress = emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
+            val _emailType = emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE)
             do {
                // val email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.Contacts.Data.DATA1))
-                val emailAddress = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS))
-                val emailType = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE))
+                val emailAddress = emailCursor.getString(_emailAddress)
+                val emailType = emailCursor.getString(_emailType)
                 var emailTypeLabel = ""
                 if (!emailType.isNullOrEmpty()){
                     emailTypeLabel = ContactsContract.CommonDataKinds.Email.getTypeLabel(_context.resources, emailType.toInt(), null).toString()

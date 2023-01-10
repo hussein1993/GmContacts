@@ -1,4 +1,4 @@
-package com.example.gmcontacts
+package com.example.gmcontacts.model
 
 enum class SearchWidgetState {
     OPENED,

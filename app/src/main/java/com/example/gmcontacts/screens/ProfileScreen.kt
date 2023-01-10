@@ -1,36 +1,26 @@
 package com.example.gmcontacts
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gmcontacts.ViewModels.ContactsViewModel
+import com.example.gmcontacts.model.Contact
 
 
 @Composable
@@ -38,8 +28,10 @@ fun ProfileScreen(profileViewModel: ContactsViewModel = viewModel()){
    // var res = rememberSaveable {
      //   mutableStateOf(profileViewModel.selectedContact)
   //  }
-    val res : Contact by profileViewModel.selectedContact.observeAsState(Contact("","", listOf(),
-        listOf(),null))
+    val res : Contact by profileViewModel.selectedContact.observeAsState(
+        Contact("","", listOf(),
+        listOf(),null)
+    )
     if(res.name.isNullOrEmpty()){
         Text(text = "NoPermission",
             textAlign = TextAlign.Center
@@ -153,5 +145,6 @@ fun ProfileImageWithInitials(initials: String, color: Color) {
 @Composable
 fun profile() {
     ProfileContent(contact = Contact("huss", "huss", listOf(Pair("21424412","mobile"),Pair("0292992","office")),
-    listOf(Pair("hasfsa@fasf.Com","work")),null))
+    listOf(Pair("hasfsa@fasf.Com","work")),null)
+    )
 }

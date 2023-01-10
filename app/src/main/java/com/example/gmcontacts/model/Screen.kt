@@ -1,4 +1,4 @@
-package com.example.gmcontacts
+package com.example.gmcontacts.model
 
 sealed class Screen(val route :String){
     object Contacts : Screen(route = "contacts_screen")

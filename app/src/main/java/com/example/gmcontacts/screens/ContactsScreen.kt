@@ -1,9 +1,6 @@
 package com.example.gmcontacts
 
 import android.annotation.SuppressLint
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,19 +24,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.gmcontacts.ViewModels.ContactsViewModel
+import com.example.gmcontacts.model.Contact
+import com.example.gmcontacts.model.SearchWidgetState
+import com.example.gmcontacts.model.Screen
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreen(contactsViewModel: ContactsViewModel = viewModel(),navController: NavController){
+fun MainScreen(contactsViewModel: ContactsViewModel = viewModel(), navController: NavController){
 
     val searchWidgetState by remember {
         contactsViewModel.searchWidgetState
@@ -215,7 +214,9 @@ fun ContactsScreen(contactsViewModel: ContactsViewModel = viewModel(), navContro
         }else{
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxWidth().padding(15.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp)
             ) {
                 CircularProgressIndicator()
             }
